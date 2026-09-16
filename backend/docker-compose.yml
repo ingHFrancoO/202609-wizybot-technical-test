@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wizybot
+      POSTGRES_PASSWORD: wizybot
+      POSTGRES_DB: wizybot
+    ports:
+      # Host port 55432 (not 5432) to avoid clashing with a locally installed
+      # Postgres instance that may already be listening on the default port.
+      - '55432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
