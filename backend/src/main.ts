@@ -7,6 +7,9 @@ import { AppModule } from './app.module.js';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Allows the frontend (served from a different port in dev) to call this API.
+  app.enableCors();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
