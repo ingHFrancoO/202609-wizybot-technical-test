@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { ChatCompletionMessageToolCall } from 'openai/resources/chat/completions';
 import { CurrencyService } from '../../currency/currency.service.js';
 import { ProductsService } from '../../products/products.service.js';
-import { CONVERT_CURRENCIES_TOOL_NAME, SEARCH_PRODUCTS_TOOL_NAME } from './tool-definitions.js';
+import {
+  CONVERT_CURRENCIES_TOOL_NAME,
+  GET_PRODUCT_PRICE_STATS_TOOL_NAME,
+  SEARCH_PRODUCTS_TOOL_NAME,
+} from './tool-definitions.js';
 
 /**
  * Dispatches a tool call requested by the model to the matching service and
@@ -27,10 +31,7 @@ export class ToolExecutorService {
 
     try {
       const args: unknown = JSON.parse(toolCall.function.arguments);
-      console.log('args', args);
 
-      console.log('toolCall.function.name', toolCall.function.name);
-      
       switch (toolCall.function.name) {
         case SEARCH_PRODUCTS_TOOL_NAME: {
           const { query } = args as { query: string };
@@ -41,6 +42,11 @@ export class ToolExecutorService {
           const { amount, from, to } = args as { amount: number; from: string; to: string };
           const result = await this.currencyService.convert(amount, from, to);
           return JSON.stringify(result);
+        }
+        case GET_PRODUCT_PRICE_STATS_TOOL_NAME: {
+          const { query } = args as { query?: string };
+          const stats = await this.productsService.getPriceStats(query ?? '');
+          return JSON.stringify(stats);
         }
         default:
           return JSON.stringify({ error: `Unknown tool: ${toolCall.function.name}` });
